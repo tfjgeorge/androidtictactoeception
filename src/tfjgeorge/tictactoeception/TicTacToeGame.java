@@ -7,6 +7,7 @@ public class TicTacToeGame {
 	private Coordinate playableBoard;
 	private int[][] grid = new int[9][9];
 	private int[][] bigGrid = new int[3][3];
+	private int finalWinner = 0;
 
 	public TicTacToeGame(BoardView boardView) {
 
@@ -41,7 +42,7 @@ public class TicTacToeGame {
 						winner);
 				boardView.addWonBoard(wonBoard);
 
-				int finalWinner = checkWinBig(wonBoard);
+				finalWinner = checkWinBig(wonBoard);
 				if (finalWinner != 0) {
 					System.out.println("Final winner " + finalWinner);
 				}
@@ -64,46 +65,55 @@ public class TicTacToeGame {
 	// 0: no win
 	// 1: 1 won
 	// -1: -1 won
-	private int checkWin(Piece piece, int[][] grid) {
+	private int checkWin(Piece piece, int[][] grid, int factor) {
 
 		int row = (int) piece.row / 3;
 		int column = (int) piece.column / 3;
 
 		for (int i = 0; i < 3; i++) {
-			if (grid[row * 3 + i][column * 3] != 0
-					&& grid[row * 3 + i][column * 3] == grid[row * 3 + i][column * 3 + 1]
-					&& grid[row * 3 + i][column * 3 + 1] == grid[row * 3 + i][column * 3 + 2])
-				return grid[row * 3 + i][column * 3];
-			if (grid[row * 3][column * 3 + i] != 0
-					&& grid[row * 3][column * 3 + i] == grid[row * 3 + 1][column
-							* 3 + i]
-					&& grid[row * 3 + 1][column * 3 + i] == grid[row * 3 + 2][column
-							* 3 + i])
-				return grid[row * 3][column * 3 + i];
+			if (grid[row * factor + i][column * 3] != 0
+					&& grid[row * factor + i][column * factor] == grid[row
+							* factor + i][column * factor + 1]
+					&& grid[row * factor + i][column * factor + 1] == grid[row
+							* factor + i][column * factor + 2])
+				return grid[row * factor + i][column * factor];
+			if (grid[row * factor][column * factor + i] != 0
+					&& grid[row * factor][column * factor + i] == grid[row
+							* factor + 1][column * factor + i]
+					&& grid[row * factor + 1][column * factor + i] == grid[row
+							* factor + 2][column * factor + i])
+				return grid[row * factor][column * factor + i];
 		}
 
-		if (grid[row * 3][column * 3] != 0
-				&& grid[row * 3][column * 3] == grid[row * 3 + 1][column * 3 + 1]
-				&& grid[row * 3 + 2][column * 3 + 2] == grid[row * 3 + 1][column * 3 + 1])
-			return grid[row * 3][column * 3];
+		if (grid[row * factor][column * factor] != 0
+				&& grid[row * factor][column * factor] == grid[row * factor + 1][column
+						* factor + 1]
+				&& grid[row * factor + 2][column * factor + 2] == grid[row
+						* factor + 1][column * factor + 1])
+			return grid[row * factor][column * factor];
 
-		if (grid[row * 3 + 2][column * 3] != 0
-				&& grid[row * 3 + 2][column * 3] == grid[row * 3 + 1][column * 3 + 1]
-				&& grid[row * 3][column * 3 + 2] == grid[row * 3 + 1][column * 3 + 1])
-			return grid[row * 3 + 1][column * 3 + 1];
+		if (grid[row * factor + 2][column * factor] != 0
+				&& grid[row * factor + 2][column * factor] == grid[row * factor
+						+ 1][column * factor + 1]
+				&& grid[row * factor][column * factor + 2] == grid[row * factor
+						+ 1][column * factor + 1])
+			return grid[row * factor + 1][column * factor + 1];
 
 		return 0;
 	}
 
 	private int checkWinSmall(Piece piece) {
-		return checkWin(piece, grid);
+		return checkWin(piece, grid, 3);
 	}
 
 	private int checkWinBig(Piece piece) {
-		return checkWin(piece, bigGrid);
+		return checkWin(piece, bigGrid, 1);
 	}
 
 	private boolean playable(Piece piece) {
+
+		if (finalWinner != 0)
+			return false;
 
 		if (grid[piece.row][piece.column] != 0)
 			return false;
