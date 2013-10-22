@@ -36,8 +36,15 @@ public class TicTacToeGame {
 				bigGrid[(int) row / 3][(int) column / 3] = winner;
 				System.out.println(winner + " won board (" + (int) row / 3
 						+ "," + (int) column / 3 + ")");
-				boardView.addWonBoard(new Piece((int) row / 3,
-						(int) column / 3, winner));
+
+				Piece wonBoard = new Piece((int) row / 3, (int) column / 3,
+						winner);
+				boardView.addWonBoard(wonBoard);
+
+				int finalWinner = checkWinBig(wonBoard);
+				if (finalWinner != 0) {
+					System.out.println("Final winner " + finalWinner);
+				}
 			}
 
 			playableBoard = new Coordinate(row % 3, column % 3);
@@ -57,7 +64,7 @@ public class TicTacToeGame {
 	// 0: no win
 	// 1: 1 won
 	// -1: -1 won
-	private int checkWinSmall(Piece piece) {
+	private int checkWin(Piece piece, int[][] grid) {
 
 		int row = (int) piece.row / 3;
 		int column = (int) piece.column / 3;
@@ -86,6 +93,14 @@ public class TicTacToeGame {
 			return grid[row * 3 + 1][column * 3 + 1];
 
 		return 0;
+	}
+
+	private int checkWinSmall(Piece piece) {
+		return checkWin(piece, grid);
+	}
+
+	private int checkWinBig(Piece piece) {
+		return checkWin(piece, bigGrid);
 	}
 
 	private boolean playable(Piece piece) {
