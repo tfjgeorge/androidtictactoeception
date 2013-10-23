@@ -37,9 +37,9 @@ public class BoardView extends View {
 		super.onDraw(canvas);
 
 		drawGrid(canvas);
+		drawWonBoards(canvas);
 		drawPieces(canvas);
 		drawPlayableBoard(canvas);
-		drawWonBoards(canvas);
 
 	}
 
@@ -91,7 +91,7 @@ public class BoardView extends View {
 
 		for (Piece board : won) {
 
-			paint.setARGB(30, 255, 127 + 50 * board.player, 0);
+			paint.setARGB(120, 255, 127 + 50 * board.player, 0);
 
 			canvas.drawRect(board.column * 3 * squareWidth, board.row * 3
 					* squareWidth, (board.column + 1) * 3 * squareWidth,
