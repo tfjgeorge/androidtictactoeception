@@ -8,58 +8,68 @@ public class TicTacToeGame {
 	private int[][] grid = new int[9][9];
 	private int[][] bigGrid = new int[3][3];
 	private int finalWinner = 0;
+	private Player player1, player2;
+	private EndGameEventListener endListener;
 
 	public TicTacToeGame(BoardView boardView) {
 
+		player1 = new HumanPlayer(boardView, this);
+		player2 = new RandomPlayer(this);
+
 		this.boardView = boardView;
-		boardView.setPlayEventListener(new PlayEventListener() {
 
-			@Override
-			public void onEvent(int row, int column) {
-				play(row, column);
-
-			}
-		});
+		player1.requestPlay();
 
 	}
 
-	private void play(int row, int column) {
-
-		Piece piece = new Piece(row, column, player);
+	public void play(Piece piece) {
 
 		if (playable(piece)) {
 
-			grid[row][column] = player;
+			grid[piece.row][piece.column] = piece.player;
 
 			boardView.addPiece(piece);
 			int winner = checkWinSmall(piece);
 			if (winner != 0) {
-				bigGrid[(int) row / 3][(int) column / 3] = winner;
-				System.out.println(winner + " won board (" + (int) row / 3
-						+ "," + (int) column / 3 + ")");
+				bigGrid[(int) piece.row / 3][(int) piece.column / 3] = winner;
+				System.out.println(winner + " won board (" + (int) piece.row
+						/ 3 + "," + (int) piece.column / 3 + ")");
 
-				Piece wonBoard = new Piece((int) row / 3, (int) column / 3,
-						winner);
+				Piece wonBoard = new Piece((int) piece.row / 3,
+						(int) piece.column / 3, winner);
 				boardView.addWonBoard(wonBoard);
 
 				finalWinner = checkWinBig(wonBoard);
 				if (finalWinner != 0) {
 					System.out.println("Final winner " + finalWinner);
+
+					if (endListener != null) {
+						endListener.onEvent(finalWinner);
+					}
+
+					boardView.postInvalidate();
+					return;
 				}
 			}
 
-			playableBoard = new Coordinate(row % 3, column % 3);
+			playableBoard = new Coordinate(piece.row % 3, piece.column % 3);
 			if (bigGrid[playableBoard.row][playableBoard.column] != 0) {
 				playableBoard = null;
 			}
 			boardView.setPlayableSmallBoard(playableBoard);
 
-			player = -player;
+			player = -piece.player;
+			if (player == -1) {
+				player2.requestPlay();
+			} else {
+				player1.requestPlay();
+			}
 
 			boardView.postInvalidate();
 		} else {
 			// TODO This piece is not playable
 		}
+
 	}
 
 	// 0: no win
@@ -110,7 +120,7 @@ public class TicTacToeGame {
 		return checkWin(piece, bigGrid, 1);
 	}
 
-	private boolean playable(Piece piece) {
+	public boolean playable(Piece piece) {
 
 		if (finalWinner != 0)
 			return false;
@@ -125,5 +135,9 @@ public class TicTacToeGame {
 			return false;
 
 		return true;
+	}
+
+	public void setEndGameEventListener(EndGameEventListener listener) {
+		endListener = listener;
 	}
 }
