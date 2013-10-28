@@ -13,14 +13,17 @@ public class TicTacToeGame {
 
 	public TicTacToeGame(BoardView boardView) {
 
-		player1 = new HumanPlayer(boardView, this);
-		player2 = new RandomPlayer(this);
+		//player1 = new HumanPlayer(boardView, this);
+		player1 = new RandomPlayer(this, 1);
+		player2 = new RandomPlayer(this, 2);
 
 		this.boardView = boardView;
 
-		player1.requestPlay();
-
 	}
+	
+	public void start() {
+		player1.requestPlay();
+	};
 
 	public void play(Piece piece) {
 
@@ -58,8 +61,8 @@ public class TicTacToeGame {
 			}
 			boardView.setPlayableSmallBoard(playableBoard);
 
-			player = -piece.player;
-			if (player == -1) {
+			player = 3-piece.player;
+			if (player == 2) {
 				player2.requestPlay();
 			} else {
 				player1.requestPlay();

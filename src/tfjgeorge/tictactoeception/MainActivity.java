@@ -25,6 +25,8 @@ public class MainActivity extends Activity {
 				toast.show();
 			}
 		});
+		
+		game.start();
 	}
 
 	@Override

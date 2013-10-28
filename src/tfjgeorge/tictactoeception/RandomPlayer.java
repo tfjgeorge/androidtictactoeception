@@ -3,16 +3,18 @@ package tfjgeorge.tictactoeception;
 public class RandomPlayer implements Player {
 
 	private TicTacToeGame game;
+	int id;
 
-	public RandomPlayer(TicTacToeGame game) {
+	public RandomPlayer(TicTacToeGame game, int id) {
+		this.id = id;
 		this.game = game;
 	}
 
 	@Override
 	public void requestPlay() {
-		Piece piece = new Piece(rand(), rand(), -1);
+		Piece piece = new Piece(rand(), rand(), id);
 		while (!game.playable(piece)) {
-			piece = new Piece(rand(), rand(), -1);
+			piece = new Piece(rand(), rand(), id);
 		}
 		game.play(piece);
 	}
