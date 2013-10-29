@@ -2,8 +2,6 @@ package tfjgeorge.tictactoeception;
 
 import java.util.ArrayList;
 
-import android.content.Context;
-
 public class TicTacToeGame {
 
 	private BoardView boardView;
@@ -19,7 +17,7 @@ public class TicTacToeGame {
 
 		// player1 = new HumanPlayer(boardView, this);
 		player1 = new RandomPlayer(this, 1);
-		player2 = new RandomPlayer(this, 2);
+		player2 = new NotSoStupidPlayer(this, 2);
 
 		this.boardView = boardView;
 
@@ -72,7 +70,7 @@ public class TicTacToeGame {
 			boardView.postInvalidate();
 
 			try {
-				Thread.sleep(150);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -112,39 +110,58 @@ public class TicTacToeGame {
 	// 0: no win
 	// 1: 1 won
 	// -1: -1 won
-	private int checkWin(Piece piece, int[][] grid, int factor) {
+	public int checkWin(Piece piece, int[][] grid, int factor) {
+
+		int savedState = grid[piece.row][piece.column];
+		grid[piece.row][piece.column] = piece.player;
 
 		int row = (int) piece.row / 3;
 		int column = (int) piece.column / 3;
+		int winner;
 
 		for (int i = 0; i < 3; i++) {
+			// Row
 			if (grid[row * factor + i][column * 3] != 0
 					&& grid[row * factor + i][column * factor] == grid[row
 							* factor + i][column * factor + 1]
 					&& grid[row * factor + i][column * factor + 1] == grid[row
-							* factor + i][column * factor + 2])
-				return grid[row * factor + i][column * factor];
+							* factor + i][column * factor + 2]) {
+				winner = grid[row * factor + i][column * factor];
+				grid[piece.row][piece.column] = savedState;
+				return winner;
+			}
+			// Column
 			if (grid[row * factor][column * factor + i] != 0
 					&& grid[row * factor][column * factor + i] == grid[row
 							* factor + 1][column * factor + i]
 					&& grid[row * factor + 1][column * factor + i] == grid[row
-							* factor + 2][column * factor + i])
-				return grid[row * factor][column * factor + i];
+							* factor + 2][column * factor + i]) {
+				winner = grid[row * factor][column * factor + i];
+				grid[piece.row][piece.column] = savedState;
+				return winner;
+			}
 		}
 
+		// Diagonals
 		if (grid[row * factor][column * factor] != 0
 				&& grid[row * factor][column * factor] == grid[row * factor + 1][column
 						* factor + 1]
 				&& grid[row * factor + 2][column * factor + 2] == grid[row
-						* factor + 1][column * factor + 1])
-			return grid[row * factor][column * factor];
+						* factor + 1][column * factor + 1]) {
+			winner = grid[row * factor][column * factor];
+			grid[piece.row][piece.column] = savedState;
+			return winner;
+		}
 
 		if (grid[row * factor + 2][column * factor] != 0
 				&& grid[row * factor + 2][column * factor] == grid[row * factor
 						+ 1][column * factor + 1]
 				&& grid[row * factor][column * factor + 2] == grid[row * factor
-						+ 1][column * factor + 1])
-			return grid[row * factor + 1][column * factor + 1];
+						+ 1][column * factor + 1]) {
+			winner = grid[row * factor + 1][column * factor + 1];
+			grid[piece.row][piece.column] = savedState;
+			return winner;
+		}
 
 		int empty = -1;
 
@@ -157,14 +174,16 @@ public class TicTacToeGame {
 			}
 		}
 
+		grid[piece.row][piece.column] = savedState;
+		
 		return empty;
 	}
 
-	private int checkWinSmall(Piece piece) {
+	public int checkWinSmall(Piece piece) {
 		return checkWin(piece, board.getGrid(), 3);
 	}
 
-	private int checkWinBig(Piece piece) {
+	public int checkWinBig(Piece piece) {
 		return checkWin(piece, board.getBigGrid(), 1);
 	}
 
