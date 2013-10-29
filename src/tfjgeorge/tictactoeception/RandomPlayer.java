@@ -1,5 +1,7 @@
 package tfjgeorge.tictactoeception;
 
+import java.util.ArrayList;
+
 public class RandomPlayer implements Player {
 
 	private TicTacToeGame game;
@@ -12,15 +14,20 @@ public class RandomPlayer implements Player {
 
 	@Override
 	public void requestPlay() {
-		Piece piece = new Piece(rand(), rand(), id);
-		while (!game.playable(piece)) {
-			piece = new Piece(rand(), rand(), id);
+		ArrayList<Coordinate> possiblePlays = game.getPossiblePlays();
+
+		if (possiblePlays.size() > 0) {
+			Coordinate emptyCoordinate = possiblePlays.get(rand(possiblePlays
+					.size()));
+			Piece piece = new Piece(emptyCoordinate.row,
+					emptyCoordinate.column, id);
+
+			game.play(piece);
 		}
-		game.play(piece);
 	}
 
-	private int rand() {
-		return (int) (Math.random() * 9);
+	private int rand(int max) {
+		return (int) (Math.random() * max);
 	}
 
 }

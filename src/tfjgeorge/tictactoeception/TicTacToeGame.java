@@ -1,27 +1,33 @@
 package tfjgeorge.tictactoeception;
 
+import java.util.ArrayList;
+
+import android.content.Context;
+
 public class TicTacToeGame {
 
 	private BoardView boardView;
+	private Board board;
 	private int player = 1;
 	private Coordinate playableBoard;
-	private int[][] grid = new int[9][9];
-	private int[][] bigGrid = new int[3][3];
 	private int finalWinner = 0;
 	private Player player1, player2;
 	private EndGameEventListener endListener;
+	private ArrayList<Coordinate> possiblePlays;
 
 	public TicTacToeGame(BoardView boardView) {
 
-		//player1 = new HumanPlayer(boardView, this);
+		// player1 = new HumanPlayer(boardView, this);
 		player1 = new RandomPlayer(this, 1);
 		player2 = new RandomPlayer(this, 2);
 
 		this.boardView = boardView;
 
 	}
-	
+
 	public void start() {
+		this.board = new Board();
+		updatePossiblePlays();
 		player1.requestPlay();
 	};
 
@@ -29,12 +35,13 @@ public class TicTacToeGame {
 
 		if (playable(piece)) {
 
-			grid[piece.row][piece.column] = piece.player;
+			board.set(piece);
 
 			boardView.addPiece(piece);
 			int winner = checkWinSmall(piece);
 			if (winner != 0) {
-				bigGrid[(int) piece.row / 3][(int) piece.column / 3] = winner;
+				board.setBig((int) piece.row / 3, (int) piece.column / 3,
+						winner);
 				System.out.println(winner + " won board (" + (int) piece.row
 						/ 3 + "," + (int) piece.column / 3 + ")");
 
@@ -43,7 +50,7 @@ public class TicTacToeGame {
 				boardView.addWonBoard(wonBoard);
 
 				finalWinner = checkWinBig(wonBoard);
-				if (finalWinner != 0) {
+				if (finalWinner > 0) {
 					System.out.println("Final winner " + finalWinner);
 
 					if (endListener != null) {
@@ -53,26 +60,53 @@ public class TicTacToeGame {
 					boardView.postInvalidate();
 					return;
 				}
+
 			}
 
 			playableBoard = new Coordinate(piece.row % 3, piece.column % 3);
-			if (bigGrid[playableBoard.row][playableBoard.column] != 0) {
+			if (board.getBig(playableBoard) != 0) {
 				playableBoard = null;
 			}
 			boardView.setPlayableSmallBoard(playableBoard);
+			updatePossiblePlays();
+			boardView.postInvalidate();
 
-			player = 3-piece.player;
+			try {
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			player = 3 - piece.player;
 			if (player == 2) {
 				player2.requestPlay();
 			} else {
 				player1.requestPlay();
 			}
 
-			boardView.postInvalidate();
 		} else {
 			// TODO This piece is not playable
 		}
 
+	}
+
+	private void updatePossiblePlays() {
+		possiblePlays = new ArrayList<Coordinate>();
+		Coordinate coordinate;
+
+		for (int row = 0; row < 9; row++) {
+			for (int col = 0; col < 9; col++) {
+				coordinate = new Coordinate(row, col);
+				if (playable(coordinate)) {
+					possiblePlays.add(coordinate);
+				}
+			}
+		}
+	}
+
+	public ArrayList<Coordinate> getPossiblePlays() {
+		return possiblePlays;
 	}
 
 	// 0: no win
@@ -112,29 +146,45 @@ public class TicTacToeGame {
 						+ 1][column * factor + 1])
 			return grid[row * factor + 1][column * factor + 1];
 
-		return 0;
+		int empty = -1;
+
+		for (int i = 0; i < 3 && empty == -1; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (grid[row * factor + i][column * factor + j] == 0) {
+					empty = 0;
+					break;
+				}
+			}
+		}
+
+		return empty;
 	}
 
 	private int checkWinSmall(Piece piece) {
-		return checkWin(piece, grid, 3);
+		return checkWin(piece, board.getGrid(), 3);
 	}
 
 	private int checkWinBig(Piece piece) {
-		return checkWin(piece, bigGrid, 1);
+		return checkWin(piece, board.getBigGrid(), 1);
 	}
 
 	public boolean playable(Piece piece) {
+		return playable(piece.getCoordinate());
+	}
+
+	public boolean playable(Coordinate coordinate) {
 
 		if (finalWinner != 0)
 			return false;
 
-		if (grid[piece.row][piece.column] != 0)
+		if (board.get(coordinate) != 0)
 			return false;
-		if (bigGrid[(int) piece.row / 3][(int) piece.column / 3] != 0)
+
+		if (board.getBig((int) coordinate.row / 3, (int) coordinate.column / 3) != 0)
 			return false;
 
 		if (playableBoard != null
-				&& ((int) (piece.row / 3) != playableBoard.row || (int) (piece.column / 3) != playableBoard.column))
+				&& ((int) (coordinate.row / 3) != playableBoard.row || (int) (coordinate.column / 3) != playableBoard.column))
 			return false;
 
 		return true;

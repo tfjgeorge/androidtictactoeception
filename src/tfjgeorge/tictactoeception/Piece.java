@@ -11,5 +11,9 @@ public class Piece {
 		this.column = column;
 		this.player = player;
 	}
+	
+	public Coordinate getCoordinate() {
+		return new Coordinate(row, column);
+	}
 
 }
